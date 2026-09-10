@@ -1,0 +1,13 @@
+---
+description: Keep Supabase schema in a single SQL migration file
+globs: supabase/**/*
+alwaysApply: false
+---
+
+# Supabase schema (single file)
+
+- Schema source of truth is only `supabase/migrations/0001_init.sql`.
+- Do **not** create `0002_*.sql`, `0003_*.sql`, or any additional migration files.
+- All schema changes (new tables, columns, indexes, RLS, seed settings) go into `0001_init.sql`.
+- Keep statements idempotent (`IF NOT EXISTS` / `ON CONFLICT`) so the file can be re-run safely in the SQL Editor.
+- When schema changes, update related references (`scripts/lib.mjs` `TABLES`, `database.types.ts`, README) as needed — still without adding new SQL files.

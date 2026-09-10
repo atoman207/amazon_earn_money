@@ -1,0 +1,48 @@
+{
+  "name": "price-radar",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:verify": "node scripts/verify-db.mjs",
+    "db:seed": "node scripts/seed.mjs",
+    "scan": "node scripts/scan.mjs",
+    "db:init": "node scripts/init-settings.mjs",
+    "db:setup": "node scripts/setup.mjs",
+    "amazon:login": "tsx scripts/amazon-login.ts",
+    "amazon:verify": "tsx scripts/amazon-verify.ts",
+    "amazon:open": "tsx scripts/amazon-open.ts",
+    "amazon:scan": "tsx scripts/amazon-discount-scan.ts",
+    "amazon:install": "playwright install chromium",
+    "cart:evaluate": "tsx --tsconfig scripts/tsconfig.scan.json scripts/evaluate-cart.ts",
+    "backtest": "tsx --tsconfig scripts/tsconfig.scan.json scripts/backtest.ts"
+  },
+  "dependencies": {
+    "@supabase/ssr": "^0.12.6",
+    "@supabase/supabase-js": "^2.116.0",
+    "date-fns": "^4.4.0",
+    "next": "16.3.4",
+    "playwright": "^1.55.1",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.4",
+    "tailwindcss": "^4",
+    "tsx": "^4.20.5",
+    "typescript": "^5",
+    "vitest": "^5.0.0"
+  }
+}

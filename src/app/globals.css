@@ -1,0 +1,190 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   価格差レーダー — デザイントークン
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #f7f7f8;
+  --surface2: var(--surface-2);
+  --field: #ffffff;
+  --line: #e5e5e5;
+  --line-strong: #d0d0d0;
+
+  --ink: #111111;
+  --ink-soft: #333333;
+  --muted: #666666;
+
+  --accent: #1a56db;
+  --accent-ink: #1a56db;
+  --accent-soft: #eff4ff;
+  --on-accent: #ffffff;
+
+  --good: #0a7a4c;
+  --good-soft: #eaf7f1;
+  --bad: #c62828;
+  --bad-soft: #fdecec;
+  --warn: #9a6700;
+  --warn-soft: #fff6e5;
+
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-lg: none;
+  --ring: 0 0 0 2px rgb(26 86 219 / 0.25);
+  --radius: 8px;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface2: var(--surface-2);
+  --color-field: var(--field);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-good: var(--good);
+  --color-bad: var(--bad);
+  --color-warn: var(--warn);
+
+  --font-sans: var(--font-noto-sans-jp), "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-noto-serif-jp), "Noto Serif JP", ui-serif, serif;
+
+  --shadow-card: var(--shadow);
+  --radius-card: var(--radius);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-noto-sans-jp), "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "palt" 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-noto-serif-jp), "Noto Serif JP", ui-serif, serif;
+  letter-spacing: 0;
+}
+
+::selection {
+  background: rgb(26 86 219 / 0.18);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "palt" 0, "tnum" 1;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  gap: 0.4rem;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+}
+.btn:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+  background: var(--surface-2);
+}
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+
+.btn-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.btn-primary:hover {
+  border-color: var(--accent-ink);
+  background: var(--accent-ink);
+  color: var(--on-accent);
+}
+
+.btn-soft {
+  border-color: var(--line);
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.btn-soft:hover {
+  border-color: var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.field {
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--field);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--ink);
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.field:hover { border-color: var(--line-strong); }
+.field:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: var(--ring);
+}
+
+/* 日本語フォントの palt はネイティブ select で文字が重なる */
+select,
+option {
+  font-feature-settings: "palt" 0;
+  font-family: var(--font-noto-sans-jp), "Noto Sans JP", ui-sans-serif, system-ui, sans-serif;
+}
+
+select.field,
+.field-inline {
+  min-height: 2.25rem;
+  appearance: auto;
+}
+
+.field-inline {
+  width: auto;
+  max-width: 100%;
+  min-width: 11rem;
+}
+
+.row-hover tbody tr:hover {
+  background: var(--surface-2);
+}
