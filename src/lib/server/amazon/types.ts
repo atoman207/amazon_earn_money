@@ -48,6 +48,18 @@ export interface AmazonSessionStatus extends AmazonSessionMeta {
 
 export type AmazonBrowserMode = "headed" | "headless";
 
+export interface ScrapedProduct {
+  asin: string;
+  name: string;
+  quantity: string | null;
+  referencePrice: number | null;
+  unitPrice: number | null;
+  discountRate: number | null;
+  discountAmount: number | null;
+  imageUrl: string | null;
+  productUrl: string;
+}
+
 export interface AmazonProductPage {
   auth: AmazonAuthState;
   title: string | null;

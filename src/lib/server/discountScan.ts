@@ -1,13 +1,7 @@
 import "server-only";
 import { verdictForRate } from "@/lib/domain/discounts";
-import { withAmazonSession } from "@/lib/server/amazon/auth";
 import { categoryById } from "@/lib/server/amazon/catalog";
-import {
-  applyFiltersAndSort,
-  openDiscountPage,
-  scrapeAllProducts,
-  type ScrapedProduct,
-} from "@/lib/server/amazon/discounts";
+import type { ScrapedProduct } from "@/lib/server/amazon/types";
 import {
   buildChatworkMessage,
   buildRankings,
@@ -388,6 +382,12 @@ export async function runDiscountScan(scanId: string): Promise<DiscountScanRow> 
   };
 
   try {
+    // Playwright は実行時だけ読む。ダッシュボード等の DB 照会経路にブラウザ依存を載せない。
+    const { withAmazonSession } = await import("@/lib/server/amazon/auth");
+    const { applyFiltersAndSort, openDiscountPage, scrapeAllProducts } = await import(
+      "@/lib/server/amazon/discounts"
+    );
+
     // 既定は実ブラウザ表示（元ツールと同じ）。サーバー常駐なら AMAZON_SCAN_HEADLESS=1 で伏せる。
     const mode = process.env.AMAZON_SCAN_HEADLESS === "1" ? "headless" : "headed";
 

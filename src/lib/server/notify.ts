@@ -1,5 +1,5 @@
 import "server-only";
-import { formatQuantity } from "@/lib/server/amazon/discounts";
+import { formatQuantity } from "@/lib/server/amazon/quantity";
 import type { DiscountProductRow, DiscountScanRow } from "@/lib/supabase/database.types";
 
 /**

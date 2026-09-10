@@ -5,7 +5,7 @@ import {
   normalizeSendMethods,
   normalizeSortValue,
 } from "./catalog";
-import { extractNumber, formatQuantity } from "./discounts";
+import { extractNumber, formatQuantity } from "./quantity";
 
 describe("extractNumber", () => {
   it("円記号とカンマを外して数値にする", () => {

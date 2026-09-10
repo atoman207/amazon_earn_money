@@ -1,6 +1,9 @@
 import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
 import { saveSessionMeta, sessionExists, sessionFilePath } from "./session";
+import { sleep } from "./sleep";
 import type { AmazonBrowserMode } from "./types";
+
+export { sleep };
 
 const AMAZON_HOME = "https://www.amazon.co.jp/";
 const AMAZON_BUSINESS = "https://www.amazon.co.jp/gp/b2b.html";
@@ -94,10 +97,6 @@ export async function launchAmazonBrowser(opts: {
   const page = await context.newPage();
   page.setDefaultTimeout(30_000);
   return { browser, context, page };
-}
-
-export function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function saveContextSession(context: BrowserContext) {

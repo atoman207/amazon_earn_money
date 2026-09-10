@@ -1,6 +1,11 @@
 import type { Locator, Page } from "playwright";
-import { sleep } from "./browser";
 import { SORT_VALUE_TO_AMAZON, categoryById } from "./catalog";
+import { extractNumber, formatQuantity } from "./quantity";
+import { sleep } from "./sleep";
+import type { ScrapedProduct } from "./types";
+
+export { extractNumber, formatQuantity };
+export type { ScrapedProduct };
 
 /**
  * Amazonビジネス割引ページのスクレイピング。
@@ -30,18 +35,6 @@ const SORT_DROPDOWN_BUTTON =
 const PRODUCT_CONTAINER = "div.a-cardui._dmFsd_cardItem_1LFgv[data-a-card-type='basic']";
 const PRODUCT_CONTAINER_FALLBACK = "div.a-cardui._dmFsd_cardItem_1LFgv";
 
-export interface ScrapedProduct {
-  asin: string;
-  name: string;
-  quantity: string | null;
-  referencePrice: number | null;
-  unitPrice: number | null;
-  discountRate: number | null;
-  discountAmount: number | null;
-  imageUrl: string | null;
-  productUrl: string;
-}
-
 export interface ScrapeOptions {
   categoryIds: number[];
   minDiscountRate: number;
@@ -52,28 +45,6 @@ export interface ScrapeOptions {
   maxProducts?: number;
   /** 新規商品が見つからないスクロールがこの回数続いたら終了 */
   maxIdleScrolls?: number;
-}
-
-/** 「¥1,599」「31.5%」などから数値を取り出す（extract_number 相当） */
-export function extractNumber(text: string | null | undefined): number | null {
-  if (!text) return null;
-  const cleaned = text.replace(/[¥,円\s]|JPY/g, "");
-  const m = cleaned.match(/\d+(?:\.\d+)?/);
-  if (!m) return null;
-  const n = Number(m[0]);
-  return Number.isFinite(n) ? n : null;
-}
-
-/** 「10+」→「10個以上」「1」→「1個」（_format_quantity_display 相当） */
-export function formatQuantity(qty: string | null | undefined): string {
-  if (!qty) return "";
-  const s = String(qty).trim();
-  if (s.endsWith("+")) {
-    const n = s.slice(0, -1).trim();
-    return n ? `${n}個以上` : s;
-  }
-  if (s === "1") return "1個";
-  return /^\d+$/.test(s) ? `${s}個` : s;
 }
 
 async function clickIfPresent(locator: Locator, delayAfterMs = 1500): Promise<boolean> {
