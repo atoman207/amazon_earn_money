@@ -67,6 +67,30 @@ npm run dev         # http://localhost:3000
 
 ブラウザで開くとログイン画面が出ます。初期アカウント（上の表）で入ってください。
 
+### 1-4. Vercel へデプロイする
+
+1. **環境変数を登録する。** `.env.local` は Git に入れていないので、Vercel の
+   Settings → Environment Variables に 1-1 の表の変数を貼り直します
+   （Production / Preview の両方）。`CRON_SECRET` を入れておくと、Vercel Cron の
+   リクエストに `Authorization: Bearer <CRON_SECRET>` が自動で付きます。
+2. **デプロイする。** ビルドコマンドは既定（`next build`）のままで通ります。
+3. **公開範囲を決める。** この画面は URL を知っていれば誰でも開けます
+   （`proxy.ts` は素通しで、ログイン必須なのは一部の画面だけ）。社外に見せない運用なら
+   Vercel の Deployment Protection を有効にしてください。
+
+**Vercel 上では動かない機能**（実ブラウザを開くため。手元の `npm run dev` で実行します）:
+
+| 機能 | 画面 |
+|---|---|
+| Amazonビジネスへのログイン・セッション保存 | 設定 |
+| ビジネス割引スキャンの実行 | 割引検索 |
+
+保存済みの結果を **見る** ことは Vercel 上でもできます。実行だけが手元の作業です。
+サーバー上で押した場合は「Vercel 上では実行できません」と理由を返します。
+
+> 関数の最大実行時間は Hobby プランの上限に合わせて 60 秒にしてあります。
+> Pro（最大 300 秒）へ移ったら各 `route.ts` の `maxDuration` を引き上げてください。
+
 ---
 
 ## 2. 使い方
@@ -126,12 +150,30 @@ npm run amazon:scan -- <id>   # discount_scans の id を指定して実行
 
 ### 定期実行（本番）
 
+本来の間隔は次のとおりです。自前のサーバーや外部のスケジューラから叩く場合はこれを使います。
+
 ```cron
 */5 * * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://example.com/api/cron/scan
 0 * * * *   curl -s -H "Authorization: Bearer $CRON_SECRET" https://example.com/api/cron/notify
 0 8 * * *   curl -s -H "Authorization: Bearer $CRON_SECRET" https://example.com/api/cron/exit-scan
 0 */4 * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://example.com/api/cron/collect
 ```
+
+**Vercel Cron の場合**は `vercel.json` に書きます。ただし Hobby プランは
+「1日1回 × 2本まで」なので、上の4本はそのまま載りません。現在は要になる2本だけを
+入れてあります（時刻は UTC。`22:00 UTC` = 翌 07:00 JST）。
+
+```json
+{ "crons": [
+  { "path": "/api/cron/collect", "schedule": "0 22 * * *" },
+  { "path": "/api/cron/scan",    "schedule": "0 23 * * *" }
+] }
+```
+
+`/api/cron/notify` と `/api/cron/exit-scan` も本来の間隔で回したいときは、
+Pro プランへ上げて `vercel.json` に4本とも書くか、外部のスケジューラから
+`https://<本番URL>/api/cron/notify?key=<CRON_SECRET>` を叩いてください
+（各エンドポイントは `Authorization` ヘッダーと `?key=` のどちらでも通ります）。
 
 ### 価格の取り込み
 

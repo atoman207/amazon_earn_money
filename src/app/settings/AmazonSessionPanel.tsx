@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge, Card } from "@/components/ui";
 
 interface SessionStatus {
@@ -36,17 +36,24 @@ export function AmazonSessionPanel() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<Busy>(null);
 
-  const refresh = useCallback(async () => {
-    const res = await fetch("/api/amazon/session", { cache: "no-store" });
-    const json = (await res.json()) as { ok: boolean; status?: SessionStatus; error?: string };
-    if (!json.ok || !json.status) throw new Error(json.error ?? "状態を取得できませんでした");
-    setStatus(json.status);
-    return json.status;
-  }, []);
-
+  // 初回に現在のセッション状態を読む。
+  // 画面から離れたあとに書き戻さないよう alive で見張る。
   useEffect(() => {
-    refresh().catch((e: unknown) => setError(e instanceof Error ? e.message : "読み込みに失敗しました"));
-  }, [refresh]);
+    let alive = true;
+    void (async () => {
+      try {
+        const res = await fetch("/api/amazon/session", { cache: "no-store" });
+        const json = (await res.json()) as { ok: boolean; status?: SessionStatus; error?: string };
+        if (!json.ok || !json.status) throw new Error(json.error ?? "状態を取得できませんでした");
+        if (alive) setStatus(json.status);
+      } catch (e) {
+        if (alive) setError(e instanceof Error ? e.message : "読み込みに失敗しました");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const run = async (action: Exclude<Busy, null>, body?: Record<string, unknown>) => {
     setBusy(action);

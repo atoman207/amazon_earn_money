@@ -3,7 +3,8 @@ import { analyzeNiche } from "@/lib/server/ai";
 import { audit } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 120;
+// Vercel Hobby の関数上限は 60 秒。Pro（最大 300 秒）へ移ったら引き上げてよい。
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const result = await analyzeNiche();

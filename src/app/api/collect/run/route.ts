@@ -5,7 +5,8 @@ import { audit } from "@/lib/server/settings";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 120;
+// Vercel Hobby の関数上限は 60 秒。Pro（最大 300 秒）へ移ったら引き上げてよい。
+export const maxDuration = 60;
 
 /**
  * 画面の「いま取り込む」から呼ぶ収集（①-2）。

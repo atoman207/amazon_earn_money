@@ -5,7 +5,8 @@ import { promoteCartItems } from "@/lib/server/promote";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-export const maxDuration = 120;
+// Vercel Hobby の関数上限は 60 秒。Pro（最大 300 秒）へ移ったら引き上げてよい。
+export const maxDuration = 60;
 
 /**
  * カートの中身をまとめて採算判定へ載せる。

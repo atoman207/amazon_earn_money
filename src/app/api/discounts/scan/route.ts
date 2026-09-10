@@ -5,7 +5,7 @@ import {
   normalizeSendMethods,
   normalizeSortValue,
 } from "@/lib/server/amazon/catalog";
-import { spawnAmazonScript } from "@/lib/server/amazon/run-script";
+import { isServerless, spawnAmazonScript, SERVERLESS_MESSAGE } from "@/lib/server/amazon/run-script";
 import { currentUser } from "@/lib/server/auth";
 import { listCartAsins } from "@/lib/server/cart";
 import { sessionExists } from "@/lib/server/amazon/session";
@@ -49,6 +49,12 @@ export async function GET(req: Request) {
 
 /** スキャンを開始する。実処理は別プロセスへ渡し、すぐに返す。 */
 export async function POST(req: Request) {
+  // 実処理は実ブラウザを開く別プロセスなので、サーバーレス上では走らせられない。
+  // 空の「実行待ち」スキャンを作ってしまう前に、ここで理由を返して終わる。
+  if (isServerless) {
+    return NextResponse.json({ ok: false, error: SERVERLESS_MESSAGE }, { status: 501 });
+  }
+
   const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
 
   const categoryIds = normalizeCategoryIds(body.categoryIds ?? body.category_ids);

@@ -12,8 +12,18 @@ const DEFAULT_META: AmazonSessionMeta = {
   message: null,
 };
 
+/*
+ * 以下の fs 呼び出しには turbopackIgnore を付けている。
+ *
+ * 保存先はログイン時に作られる実行時の状態で、ビルドの入力ではない。印を付けないと
+ * Turbopack が「パスを静的に決められない」と判断してプロジェクト全体（public を含む）
+ * を関数バンドルへ取り込み、Vercel のデプロイが太って上限に当たる。
+ */
 export function sessionFilePath() {
-  return path.resolve(process.env.AMAZON_SESSION_PATH ?? path.join(process.cwd(), "amazon_session.json"));
+  return path.resolve(
+    /*turbopackIgnore: true*/ process.env.AMAZON_SESSION_PATH ??
+      path.join(process.cwd(), "amazon_session.json"),
+  );
 }
 
 export function sessionMetaPath() {
@@ -59,7 +69,7 @@ export function summarizeCookies(cookies: AmazonCookie[]) {
 
 export async function sessionExists() {
   try {
-    await stat(sessionFilePath());
+    await stat(/*turbopackIgnore: true*/ sessionFilePath());
     return true;
   } catch {
     return false;
@@ -68,7 +78,7 @@ export async function sessionExists() {
 
 export async function loadStorageState(): Promise<AmazonStorageState | null> {
   try {
-    const raw = await readFile(sessionFilePath(), "utf8");
+    const raw = await readFile(/*turbopackIgnore: true*/ sessionFilePath(), "utf8");
     const parsed = JSON.parse(raw) as AmazonStorageState;
     if (!parsed || !Array.isArray(parsed.cookies)) return null;
     return parsed;
@@ -79,7 +89,7 @@ export async function loadStorageState(): Promise<AmazonStorageState | null> {
 
 export async function loadSessionMeta(): Promise<AmazonSessionMeta> {
   try {
-    const raw = await readFile(sessionMetaPath(), "utf8");
+    const raw = await readFile(/*turbopackIgnore: true*/ sessionMetaPath(), "utf8");
     return { ...DEFAULT_META, ...(JSON.parse(raw) as Partial<AmazonSessionMeta>) };
   } catch {
     return { ...DEFAULT_META };
@@ -89,8 +99,8 @@ export async function loadSessionMeta(): Promise<AmazonSessionMeta> {
 export async function saveSessionMeta(patch: Partial<AmazonSessionMeta>) {
   const current = await loadSessionMeta();
   const next: AmazonSessionMeta = { ...current, ...patch };
-  await mkdir(path.dirname(sessionMetaPath()), { recursive: true });
-  await writeFile(sessionMetaPath(), `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  await mkdir(/*turbopackIgnore: true*/ path.dirname(sessionMetaPath()), { recursive: true });
+  await writeFile(/*turbopackIgnore: true*/ sessionMetaPath(), `${JSON.stringify(next, null, 2)}\n`, "utf8");
   return next;
 }
 
@@ -99,7 +109,7 @@ export async function getSessionStatus(): Promise<AmazonSessionStatus> {
   const state = await loadStorageState();
   let savedFileAt: string | null = null;
   try {
-    const s = await stat(sessionFilePath());
+    const s = await stat(/*turbopackIgnore: true*/ sessionFilePath());
     savedFileAt = s.mtime.toISOString();
   } catch {
     savedFileAt = null;
@@ -121,7 +131,7 @@ export async function deleteSessionFiles() {
   await Promise.all(
     [sessionFilePath(), sessionMetaPath()].map(async (p) => {
       try {
-        await unlink(p);
+        await unlink(/*turbopackIgnore: true*/ p);
       } catch {
         /* already gone */
       }
