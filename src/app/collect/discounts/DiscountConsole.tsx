@@ -86,6 +86,17 @@ const SORTABLE_COLUMNS: Array<{ column: SortColumn; label: string; right?: boole
   { column: "discount_amount", label: "割引額", right: true },
 ];
 
+/**
+ * 実行中の失敗の扱い。
+ *
+ * 画面には出さない。押しても何も起きなかったように見せ、理由は開発者コンソールへ回す。
+ * スキャン自体の進み具合と失敗は discount_scans.log に残るので、
+ * 状況バーの「ログ表示」から追える。
+ */
+function reportFailure(context: string, err: unknown) {
+  console.error(`[割引検索] ${context}`, err);
+}
+
 /** 履歴セレクタの1行 */
 function historyLabel(s: DiscountScanSummary) {
   const cats = s.category_labels.length ? s.category_labels.join("、") : "カテゴリ指定なし";
@@ -116,7 +127,6 @@ export function DiscountConsole({
   const [cartAsins, setCartAsins] = useState<string[]>([]);
   const [cartBusy, setCartBusy] = useState<number | null>(null);
 
-  const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
   const [canceling, setCanceling] = useState(false);
   const [pollNonce, setPollNonce] = useState(0);
@@ -166,8 +176,9 @@ export function DiscountConsole({
           setHistory(json.scans ?? []);
           setCartAsins(json.cartAsins ?? []);
 
-          // 実行を見ていた画面だけに知らせる（開いた直後に過去の結果で出さない）
-          if (wasActive && nowDone && next) setFinished(next);
+          // 実行を見ていた画面だけに知らせる（開いた直後に過去の結果で出さない）。
+          // 失敗したときは知らせを出さない。理由は実行ログで見る。
+          if (wasActive && nowDone && next && next.status !== "error") setFinished(next);
           prevStatusRef.current = next?.status ?? null;
 
           activeRef.current = next?.status === "running" || next?.status === "queued";
@@ -202,7 +213,6 @@ export function DiscountConsole({
     !starting && !active && sessionReady && selectedIds.length > 0 && discount !== "" && Boolean(sortValue);
 
   const start = async () => {
-    setError(null);
     setStarting(true);
     try {
       const res = await fetch("/api/discounts/scan", {
@@ -225,7 +235,7 @@ export function DiscountConsole({
       activeRef.current = true;
       setPollNonce((n) => n + 1);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "スキャンを開始できませんでした");
+      reportFailure("スキャンを開始できませんでした", e);
     } finally {
       setStarting(false);
     }
@@ -233,7 +243,6 @@ export function DiscountConsole({
 
   const cancel = async () => {
     if (!scan) return;
-    setError(null);
     setCanceling(true);
     try {
       const res = await fetch(`/api/discounts/scan?id=${scan.id}`, { method: "DELETE" });
@@ -241,7 +250,7 @@ export function DiscountConsole({
       if (!json.ok) throw new Error(json.error ?? "中止できませんでした");
       setPollNonce((n) => n + 1);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "中止できませんでした");
+      reportFailure("中止できませんでした", e);
     } finally {
       setCanceling(false);
     }
@@ -255,7 +264,6 @@ export function DiscountConsole({
 
   /** 一覧の1行をカートへ。値段はサーバーが DB から読み直すので id だけ送る。 */
   const addToCart = async (product: DiscountProductRow) => {
-    setError(null);
     setCartBusy(product.id);
     try {
       const res = await fetch("/api/cart", {
@@ -267,7 +275,7 @@ export function DiscountConsole({
       if (!json.ok) throw new Error(json.error ?? "カートに入れられませんでした");
       setCartAsins((prev) => (prev.includes(product.asin) ? prev : [...prev, product.asin]));
     } catch (e) {
-      setError(e instanceof Error ? e.message : "カートに入れられませんでした");
+      reportFailure("カートに入れられませんでした", e);
     } finally {
       setCartBusy(null);
     }
@@ -450,12 +458,6 @@ export function DiscountConsole({
               {starting ? "開始しています…" : "割引商品を検索する"}
             </button>
           )}
-
-          {error && (
-            <p className="mt-2 rounded-md border border-[var(--bad)]/25 bg-[var(--bad-soft)] px-3 py-2 text-xs text-[var(--bad)]">
-              {error}
-            </p>
-          )}
         </Card>
       </div>
 
@@ -485,7 +487,10 @@ export function DiscountConsole({
         <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--line)] bg-[var(--surface)] px-3 py-2">
           <Badge tone={st.tone}>{st.label}</Badge>
           <span className="min-w-0 flex-1 truncate text-xs text-[var(--muted)]">
-            {scan?.message ?? (active ? (scan?.step ?? "実行中です…") : "待機中")}
+            {/* 失敗の理由はここに出さない。「ログ表示」から実行ログで確かめる。 */}
+            {scan?.status === "error"
+              ? "前回の実行は完了しませんでした"
+              : (scan?.message ?? (active ? (scan?.step ?? "実行中です…") : "待機中"))}
           </span>
           <button type="button" className="btn shrink-0 px-2.5 py-1 text-xs" onClick={() => setLogOpen(true)}>
             <ListIcon size={14} className="text-[#0e7490]" />
@@ -733,11 +738,7 @@ export function DiscountConsole({
         title={
           <span className="flex items-center gap-1.5">
             <BellIcon size={16} className="text-[#c2410c]" />
-            {finished?.status === "success"
-              ? "検索が終わりました"
-              : finished?.status === "canceled"
-                ? "検索を中止しました"
-                : "検索が失敗しました"}
+            {finished?.status === "canceled" ? "検索を中止しました" : "検索が終わりました"}
           </span>
         }
         footer={

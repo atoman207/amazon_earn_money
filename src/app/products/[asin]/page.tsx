@@ -5,7 +5,7 @@ import { Shell } from "@/components/Shell";
 import { PriceChart } from "@/components/PriceChart";
 import { Badge, Card, Empty, Stat, Td, Th } from "@/components/ui";
 import { dateTime, days, pct, yen } from "@/lib/format";
-import { priceSeries } from "@/lib/server/queries";
+import { priceSeries, sinceDaysAgo } from "@/lib/server/queries";
 import { supabaseAdmin } from "@/lib/supabase/admin";
 import { summarizeHistory } from "@/lib/server/pipeline";
 import { backtestAsin } from "@/lib/server/backtest";
@@ -27,7 +27,7 @@ async function Detail({ asin }: { asin: string }) {
   const { data: product } = await db.from("products").select("*").eq("asin", asin).maybeSingle();
   if (!product) notFound();
 
-  const since = new Date(Date.now() - 365 * 86_400_000).toISOString();
+  const since = sinceDaysAgo(365);
   const [series, obsRes, opsRes] = await Promise.all([
     priceSeries(asin, 365),
     db

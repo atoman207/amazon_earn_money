@@ -106,7 +106,7 @@ async function Dashboard() {
           action={
             <span className="flex items-center gap-2">
               <Badge tone={state.tone}>{state.label}</Badge>
-              <Link href="/collect/amazon" className="text-xs text-[var(--accent)]">
+              <Link href="/collect/discounts" className="text-xs text-[var(--accent)]">
                 すべて見る
               </Link>
             </span>
@@ -115,7 +115,7 @@ async function Dashboard() {
           {discount.top.length === 0 ? (
             <Empty>
               まだ割引商品がありません。
-              <Link href="/collect/amazon" className="ml-1 underline">
+              <Link href="/collect/discounts" className="ml-1 underline">
                 割引検索
               </Link>
               から探してください。
@@ -443,7 +443,7 @@ async function Dashboard() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link href="/collect/amazon" className="btn">
+        <Link href="/collect/discounts" className="btn">
           <TagIcon size={16} className="text-[#c2410c]" />
           割引検索へ
         </Link>

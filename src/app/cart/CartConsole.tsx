@@ -178,7 +178,7 @@ export function CartConsole({
             <TargetIcon size={16} />
             {evaluating ? "判定しています…" : "採算を判定する"}
           </button>
-          <Link href="/collect/amazon" className="btn shrink-0">
+          <Link href="/collect/discounts" className="btn shrink-0">
             割引検索へ戻る
           </Link>
           <button
@@ -209,7 +209,7 @@ export function CartConsole({
         {visible.length === 0 ? (
           <Empty>
             まだ何も入っていません。
-            <Link href="/collect/amazon" className="ml-1 underline">
+            <Link href="/collect/discounts" className="ml-1 underline">
               割引検索
             </Link>
             で見つけた商品を「カートに入れる」で追加してください。

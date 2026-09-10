@@ -166,12 +166,12 @@ export function nextSteps(snapshot: OperationSnapshot): NextStep[] {
     },
     {
       label: "割引検索でカテゴリと割引率を選んで実行する",
-      href: "/collect/amazon",
+      href: "/collect/discounts",
       done: snapshot.discount.count > 0,
     },
     {
       label: "良さそうな商品をカートに入れる",
-      href: "/collect/amazon",
+      href: "/collect/discounts",
       done: snapshot.cart.count > 0,
     },
     {

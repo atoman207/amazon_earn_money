@@ -62,8 +62,16 @@ export const STEPS: Step[] = [
     color: "#1a56db",
     soft: "#eff4ff",
     subs: [
-      { slug: "amazon", label: "Amazon API", desc: "商品情報・在庫・価格・ランキング・手数料" },
-      { slug: "keepa", label: "Keepa API", desc: "価格推移・売れ行き・在庫履歴" },
+      {
+        slug: "discounts",
+        label: "割引検索",
+        desc: "カテゴリと割引率を選び、Amazonビジネスの割引商品を探す",
+      },
+      {
+        slug: "keepa",
+        label: "Keepa API",
+        desc: "価格推移・売れ行き・在庫履歴",
+      },
       { slug: "sellers", label: "セラー情報", desc: "競合数・出品者情報の取得" },
       { slug: "other", label: "その他データ", desc: "カテゴリ・レビュー・需要トレンド・季節性" },
     ],

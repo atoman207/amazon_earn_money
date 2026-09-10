@@ -98,8 +98,17 @@ export async function listSales(limit = 500): Promise<(SaleRow & { products: Pro
 }
 
 /** 商品の価格推移（グラフ用に日次へ間引く） */
+/**
+ * いまから days 日前の時刻。
+ * Server Component の本体で直接 Date.now() を呼ぶと react-hooks/purity に
+ * 引っかかるので、取得側のここに寄せる。
+ */
+export function sinceDaysAgo(days: number) {
+  return new Date(Date.now() - days * 86_400_000).toISOString();
+}
+
 export async function priceSeries(asin: string, days = 90) {
-  const since = new Date(Date.now() - days * 86_400_000).toISOString();
+  const since = sinceDaysAgo(days);
   const { data } = await supabaseAdmin()
     .from("price_observations")
     .select("observed_at, sell_price, buy_price, offer_count, sales_rank")
